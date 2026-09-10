@@ -1,6 +1,27 @@
 import math
 
 class Value:
+
+    def __pow__(self, other):
+        assert isinstance(other, (int, float)), "Por ahora solo soportamos potencias numéricas (int/float)"
+        out = Value(self.data ** other, (self,), f'**{other}')
+
+        def _backward():
+            self.grad += (other * (self.data ** (other - 1))) * out.grad
+        out._backward = _backward
+
+        return out
+
+    def __neg__(self): # -self
+        return self * -1
+
+    def __sub__(self, other): # self - other
+        other = other if isinstance(other, Value) else Value(other)
+        return self + (-other)
+
+    def __rsub__(self, other): # other - self
+        other = other if isinstance(other, Value) else Value(other)
+        return other + (-self)
     """
     Guarda un valor escalar y su gradiente acumulado para diferenciación automática.
     """
